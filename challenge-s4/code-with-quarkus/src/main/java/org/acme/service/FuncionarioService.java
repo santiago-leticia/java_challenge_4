@@ -1,0 +1,121 @@
+package org.acme.service;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.acme.model.DTO.FuncionarioDTO;
+import org.acme.model.Funcionario;
+import org.acme.repository.FuncionarioRepository;
+
+import java.sql.SQLException;
+import java.util.List;
+
+@ApplicationScoped
+public class FuncionarioService{
+
+    @Inject
+    FuncionarioRepository funcionarioRepository;
+
+    public void cadastraFuncionario(FuncionarioDTO funcionario) throws SQLException{
+        valiacaoCadastroFuncionario(funcionario);
+        funcionarioRepository.inserirFuncionario(funcionario);
+    }
+    public void valiacaoCadastroFuncionario(FuncionarioDTO f){
+        if (funcionarioRepository.existeEmail(f.getEmail_funcionario())){
+            throw new IllegalArgumentException("Email do Funcionario ja existe");
+        }
+        if (f.getNome_funcionario()==null || f.getNome_funcionario().isEmpty()){
+            throw new IllegalArgumentException("Nome incorreto");
+        }
+        if (f.getTipo_funcionario()==null || f.getTipo_funcionario().isEmpty()){
+            throw new IllegalArgumentException("Função do funcionario incorreto");
+        }
+        if (f.getEmail_funcionario()==null || f.getEmail_funcionario().isEmpty()){
+            throw new IllegalArgumentException("Email do funcionario incorreta");
+        }
+        if (f.getSenha_funcionario()==null || f.getSenha_funcionario().isEmpty()){
+            throw new IllegalArgumentException("senha incorreta");
+        }
+    }
+
+    public List<Funcionario> existeFuncionario(String email, String senha) throws SQLException{
+        try {
+            valiacaoRelato(email,senha);
+            return funcionarioRepository.RelatorioFuncionario(email,senha);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+    public void RemoverId(int id, String email, String senha) throws SQLException{
+        try {
+            valiacaoRemova(id,email,senha);
+            funcionarioRepository.RemoverFuncionario(id,email,senha);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void atualizarInformacaoF(int id, String nome_funcionario,String tipo_funcionario,String email, String senha) throws SQLException{
+        try {
+            valiacaoAutualiza(id, nome_funcionario, tipo_funcionario, email, senha);
+            funcionarioRepository.updanteFuncionario(id, nome_funcionario, tipo_funcionario, email, senha);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void valiacaoRemova(int id, String email, String senha){
+        try{
+            if (!funcionarioRepository.existeId(id)){
+                throw new IllegalArgumentException("Não existe o id");
+            }
+            if (id<0){
+                throw new IllegalArgumentException("ID invalido");
+            }
+            if (email==null || email.isEmpty()){
+                throw new IllegalArgumentException("Email incorreto");
+            }
+            if (senha==null || senha.isEmpty()){
+                throw new IllegalArgumentException("senha incorreta");
+            }
+        } catch (Exception e){
+            throw new RuntimeException();
+        }
+    }
+
+
+
+    public void valiacaoRelato(String email, String senha){
+        List<Funcionario>l= funcionarioRepository.RelatorioFuncionario(email, senha);
+        if (l.isEmpty()){
+            throw new IllegalArgumentException("Funcionando não encontrado");
+        }
+        if (email.isEmpty()){
+            throw  new IllegalArgumentException("Email invalido");
+        }
+        if (senha.isEmpty()){
+            throw new IllegalArgumentException("Senha invalida");
+        }
+    }
+    public void valiacaoAutualiza(int id, String nome_funcionario,String tipo_funcionario,String email, String senha){
+        try {
+            if (id<0){
+                throw new IllegalArgumentException("O id está incorreto");
+            }
+            if (nome_funcionario==null || nome_funcionario.isEmpty()){
+                throw new IllegalArgumentException("O nome do funcionario incorreto.");
+            }
+            if (tipo_funcionario==null || tipo_funcionario.isEmpty()){
+                throw new IllegalArgumentException("Tipo de funcionario incorreto");
+            }
+            if (email==null || email.isEmpty()){
+                throw new IllegalArgumentException("Email incorreto");
+            }
+            if (senha==null || senha.isEmpty()){
+                throw new IllegalArgumentException("Senha incorreta");
+            }
+        } catch (IllegalArgumentException e){
+            throw new RuntimeException("Erro apresentado: ", e);
+        }
+    }
+
+}
